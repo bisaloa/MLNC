@@ -18,5 +18,5 @@ epsilon = 0.5;
 
 N = 20;
 
-%[ OptimalPolicy,N ] = MonteCarloBatchOptimisationTestN( T,R,Initial,Absorbing,gamma,epsilon,nTest )
-[ OptimalPolicy ] = MonteCarloBatchOptimisation( T,R,Initial,Absorbing,gamma,epsilon,nTest,N);
+[ OptimalPolicy,N ] = MonteCarloBatchOptimisationTestN( T,R,Initial,Absorbing,gamma,epsilon,nTest )
+%[ OptimalPolicy ] = MonteCarloBatchOptimisation( T,R,Initial,Absorbing,gamma,epsilon,nTest,N);

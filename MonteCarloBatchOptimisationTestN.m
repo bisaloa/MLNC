@@ -16,17 +16,18 @@ while true
    newQ = MonteCarloEstimation(T,R,Initial,Absorbing,eGreedyPolicy,gamma,n);
    neweGreedyPolicy = eGreedyPolicyFromQ(newQ, Absorbing, epsilon);
    
-   Qdif = newQ - Q;
-    vectorQdif = Qdif(:);
+   %Qdif = newQ - Q;
+    %vectorQdif = Qdif(:);
     difPolicy = abs(eGreedyPolicy - neweGreedyPolicy);
-    if (max(vectorQdif) >= 0.5) && max(difPolicy(:))==0
+  %  if (max(vectorQdif) >= 0.5) && max(difPolicy(:))==0
+  if max(difPolicy(:)) == 0
         %difPolicy = eGreedyPolicy - neweGreedyPolicy;
         %if max(abs(difPolicy(:))) <= 0.5
         break;
         %end
     end
     
-    Q = newQ;
+    %Q = newQ;
     eGreedyPolicy= neweGreedyPolicy;
 end
 

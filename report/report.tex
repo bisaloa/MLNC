@@ -52,5 +52,10 @@ In the case of the first row, there is no transition to get to the current state
 
 In an absorbing state, the state where the trace ends, no further actions are taken. Therefore, the value for the last action is a dummy one.
 
+\subsection*{Question 2}
+
+In the case of \texttt{GridWorld1}, the number of traces needed to get an accurate estimation of the state-value function is about 16250. With this number of traces, the maximum difference between the values of the state-value function between two consecutive iterations is less than 0.001, and therefore, convergence is assumed. The number of batches needed until converge to the optimal policy is 5.
+
+
 
 \end{document}  

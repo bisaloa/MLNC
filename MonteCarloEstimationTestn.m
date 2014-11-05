@@ -41,7 +41,7 @@ while true
     
     Qdif = abs(oldQ - Q);
     vectorQdif = Qdif(:);
-    if max(vectorQdif) < 0.001
+    if max(vectorQdif) < 0.0001
         break;
     end
     
