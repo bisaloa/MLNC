@@ -33,9 +33,11 @@ for noEpisode = 1 : n
         newQ(state, action) = actualReturn;
     end
     countMeasurementsQ = countMeasurementsQ + EpisodeStates;
+    
+    Q = Q + newQ;
 end
 
-Q = Q + (1./max(countMeasurementsQ,1)).*(newQ - Q).*EpisodeStates;
+Q = Q ./ max(countMeasurementsQ,1);
 
 end
 
