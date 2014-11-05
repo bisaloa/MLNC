@@ -1,0 +1,56 @@
+\documentclass[11pt]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage[cm]{fullpage}
+\usepackage{tabularx}
+\usepackage{float}
+
+
+%SetFonts
+
+%SetFonts
+
+
+\title{
+	Machine Learning and Neural Computation\\
+	\textbf{Assessed Coursework}
+ }
+\author{
+	Beatriz Isabel Lopez Andrade (bil14)
+}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section*{Section A}
+\subsection*{Question 1}
+
+The function  \texttt{GetTrace} generates a random episode from a given MDP. Each row in the output has three columns, which represents the reward for a transition from the previous state to the current one having taken a particular action, the current state, and the action taken in the current state to move to the following one.
+
+In general, the function \texttt{GetTrace} generates a random sample of the current state taken into account the previous state and the chosen action in that state. After that, it gets the reward corresponding to that transition and action. If the current state is not an absorbing one, the function generates a random sample of the action in that state. However, if the current state is an absorbing one, none further actions are taken and therefore, the trace ends. The row corresponding to this state is formed by the reward, the state itself, and the action taken in the current state.
+
+\begin{table}[!h] 
+	\begin{center}
+		\begin{tabular}{ | c c  c | }
+		\hline
+		Reward & Status & Action \\ \hline \hline
+		1 & 1 & L \\ \hline
+		2 & 2 & R \\ \hline
+		\end{tabular}
+		\caption{Trace corresponding to the Stair Climbing MDP.\label{tab:traceStair}}
+		
+	\end{center}
+\end{table}
+
+For the particular trace of the \textbf{Stair Climbing MDP} (Table ~\ref{tab:traceStair}), the first state is four, because the function \texttt{StairClimbingMDP} assigns a probability of one to this state as the first state. The action in this state is ?Left?, but it could have been ?Right?, as the unbiased policy is used. In the following row, the state is three, since the probability of going from state four to three having taken action ?Left? is one. The reward for this transition is one and the next action ?Right?, but it could have been ?Left?. The following rows are computed in the same way, until an absorbing state is reached.
+
+In the case of the first row, there is no transition to get to the current state, i.e. it is the first state. Hence, there is no reward for getting to that particular state. That is the reason why a dummy value is assigned to the first reward.
+
+In an absorbing state, the state where the trace ends, no further actions are taken. Therefore, the value for the last action is a dummy one.
+
+
+\end{document}  
