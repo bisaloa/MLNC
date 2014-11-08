@@ -7,9 +7,9 @@ A = length(R(1,1,:));
 
 eGreedyPolicy = GetUnbiasedPolicy(Absorbing, A);
 
+
 for nBatch = 1:N
-    
-   Q = MonteCarloEstimation(T,R,Initial,Absorbing,eGreedyPolicy,gamma,n);
+   Q = MonteCarloEstimation(T,R,Initial,Absorbing,eGreedyPolicy,gamma,n);  
    eGreedyPolicy = eGreedyPolicyFromQ(Q, Absorbing, epsilon);
     
 end

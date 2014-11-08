@@ -41,7 +41,3 @@ Q = Q ./ max(countMeasurementsQ,1);
 
 end
 
-%function [newQ] = averageReturns(Q, actualReturn, gamma)
-% newQ = (1 - gamma) * Q + gamma*actualReturn;
-%end
-

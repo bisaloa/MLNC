@@ -2,12 +2,15 @@
 
 %\geometry{landscape}                		% Activate for rotated page geometry
 %\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
-\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+%\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
 								% TeX will automatically convert eps --> pdf in pdflatex		
 \usepackage{amssymb}
 \usepackage[cm]{fullpage}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{amsmath}
+%\usepackage[lined,boxed,figure]{algorithm2e}
+\usepackage{algorithm}
 
 
 %SetFonts
@@ -26,31 +29,99 @@
 
 \begin{document}
 \maketitle
+\begin{abstract}
+The present report assesses Monte-Carlo and Temporal Difference (specifically TD(0)) Reinforcement Learning methods for the Grid World discussed in the lecture notes. This report discusses the implementation and the influence of different parameters on the performance of both methods.
+\end{abstract}
+
+\section*{Introduction}
+Unlike Dynamic Programming, Monte-Carlo and Temporal Difference methods do not need a complete knowledge of the environment[1], they can learn from experience, i.e. interactions with the environment. In the case of Monte-Carlo methods, this experience is a set of complete traces, from an initial state to an absorbing one, formed by several tuples (action, state, reward), that describe each of the transitions. Temporal Difference also uses traces, but it does not need complete ones, since it partially relies on previous estimations to perform policy evaluation, i.e. it bootstraps.
+
+This report is divided into two sections, namely sections A and B. The first one focuses on Monte-Carlo Reinforcement Learning Methods. In particular, it discusses the implementation followed, First Visit Monte-Carlo, and the parameters that influence its performance. Section B 
+
+
+[1] Reinforcement Learning
+
 \section*{Section A}
-\subsection*{Question 1}
 
-The function  \texttt{GetTrace} generates a random episode from a given MDP. Each row in the output has three columns, which represents the reward for a transition from the previous state to the current one having taken a particular action, the current state, and the action taken in the current state to move to the following one.
+This section briefly describes the implementation of \textbf{First-Visit Monte Carlo} and evaluates the performance of Monte-Carlo Reinforcement Learning method on GrindWorld1. In particular, it estimates the number of traces needed to compute an accurate state-action value function (Q) and the number of batches until the Optimal Policy is found. It also discusses the possible impact of other parameters, such as the discounted reward ($\gamma$) and the exploration-exploitation factor ($\epsilon$), on the previous computations.
 
-In general, the function \texttt{GetTrace} generates a random sample of the current state taken into account the previous state and the chosen action in that state. After that, it gets the reward corresponding to that transition and action. If the current state is not an absorbing one, the function generates a random sample of the action in that state. However, if the current state is an absorbing one, none further actions are taken and therefore, the trace ends. The row corresponding to this state is formed by the reward, the state itself, and the action taken in the current state.
+In order to obtain the traces to perform Monte-Carlo and Temporal Difference estimations the function \texttt{GetTrace} is used. This function outputs a random episode from a given MDP. Each row in the output has three columns, that represent the reward for a transition from the previous state to the current one having taken a particular action, the current state, and the action taken in the current state to move to the following one.
+
+In general, the function \texttt{GetTrace} generates a random sample of the current state taken into account the previous state and the chosen action in that state. After that, it gets the reward corresponding to that transition and action. If the current state is not an absorbing one, the function generates a random sample of the action in that state. On the contrary, if the current state is an absorbing one, none further actions are taken and therefore, the trace ends. The row corresponding to this state is formed by the reward, the state itself, and the action taken in the current state.
 
 \begin{table}[!h] 
 	\begin{center}
 		\begin{tabular}{ | c c  c | }
 		\hline
 		Reward & Status & Action \\ \hline \hline
-		1 & 1 & L \\ \hline
-		2 & 2 & R \\ \hline
+		0 & 4 & R \\ \hline
+		-1 & 5 & R \\ \hline
+		-1 & 6 & L \\ \hline
+		1 & 5 & L \\ \hline
+		1 & 4 & R \\ \hline
+		-1 & 5 & R \\ \hline
+		-1 & 6 & R \\ \hline
+		10 & 7 & 0 \\ \hline
 		\end{tabular}
 		\caption{Trace corresponding to the Stair Climbing MDP.\label{tab:traceStair}}
 		
 	\end{center}
 \end{table}
 
-For the particular trace of the \textbf{Stair Climbing MDP} (Table ~\ref{tab:traceStair}), the first state is four, because the function \texttt{StairClimbingMDP} assigns a probability of one to this state as the first state. The action in this state is ?Left?, but it could have been ?Right?, as the unbiased policy is used. In the following row, the state is three, since the probability of going from state four to three having taken action ?Left? is one. The reward for this transition is one and the next action ?Right?, but it could have been ?Left?. The following rows are computed in the same way, until an absorbing state is reached.
+For the particular trace of \textbf{Stair Climbing MDP} in Table ~\ref{tab:traceStair}, the first state is four, because the function \texttt{StairClimbingMDP} assigns a probability of one to this state as the first state. The action in this state is \texttt{Right}, but it could have been \texttt{Left}, as the unbiased policy is used. In the following row, the state is five, since the probability of going from state four to five having taken action \texttt{Right} is one. The reward for this transition is -1 and the next action \texttt{Right}, but it could have been \texttt{Left}. The following rows are computed in the same way, until an absorbing state is reached.
 
 In the case of the first row, there is no transition to get to the current state, i.e. it is the first state. Hence, there is no reward for getting to that particular state. That is the reason why a dummy value is assigned to the first reward.
 
 In an absorbing state, the state where the trace ends, no further actions are taken. Therefore, the value for the last action is a dummy one.
+
+The function \texttt{MonteCarloEstimation} implements  \textbf{First-Visit Monte-Carlo} method. The signature of the function is the following:\\
+
+\texttt{ [Q] = MonteCarloEstimation( T, R,  Initial, Absorbing, Policy, gamma, n)} \\
+\\
+\texttt{ T }$\equiv$ transition matrix,\\
+\texttt{ R }$\equiv$ reward matrix,\\
+\texttt{ Initial} $\equiv$ vector with the probabilities of being the first state for each non-absorbing state,\\
+\texttt{ Absorbing} $\equiv$ vector whose values are 0 for non-absorbing states and 1 for absorbing ones,\\
+\texttt{ Policy} $\equiv$ matrix with the probabilities of each action in each of the states,\\
+\texttt{ gamma} $\equiv$ discounted reward,\\
+\texttt{ n }$\equiv$ number of traces to sample.\\
+
+The implementation of First-Visit Monte-Carlo is shown in procedural form in figure ~\ref{fig:MC-FV}.
+begin{algorithmic}
+ 	\STATE SumReturns(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+ 	\STATE N(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+	 \FOR{$i=1$ \TO $n}
+  		generate a new trace\;
+  		\IF{first time $(s,a)$ appearing in the trace}
+   			R $\leftarrow$ return following the first occurrence of (s,a)\;
+   			SumReturns(s,a) $\leftarrow$ SumReturns(s,a) + R\;
+   			N(s,a) $\leftarrow$ N(s,a) + 1\;
+  		\ENDIF
+ 	 \ENDFOR
+ Q(s,a) \leftarrow SumReturns(s,a) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+ \caption{First-Visit Monte-Carlo implementation.}
+\end{algorithmic}
+
+
+
+%\begin{algorithm} [h!]
+ %\KwResult{Q}
+ %SumReturns(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+% N(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+% \For{i $\leftarrow$ 1 $\KwTo$ n }{
+%  generate a new trace\;
+%  \If{first time $(s,a)$ appearing in the trace}{
+%   R $\leftarrow$ return following the first occurrence of (s,a)\;
+ %  SumReturns(s,a) $\leftarrow$ SumReturns(s,a) + R\;
+ %  N(s,a) $\leftarrow$ N(s,a) + 1\;
+ % }
+ %}
+% Q(s,a) $\leftarrow$ SumReturns(s,a) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+ %\caption{First-Visit Monte-Carlo implementation.}
+%\end{algorithm}
+ 
+
+
 
 \subsection*{Question 2}
 

@@ -1,4 +1,4 @@
-function [ Q,n ] = MonteCarloEstimationTestn( T,R,Initial,Absorbing,Policy,gamma)
+function [ Q,n,maxVarQ ] = MonteCarloEstimationTestn( T,R,Initial,Absorbing,Policy,gamma)
 %MONTECARLOESTIMATION Performs Monte-Carlo estimation
 %   n is the number of traces to sample
 
@@ -8,6 +8,7 @@ Q = zeros(S, A); % i.e. optimal state-action value function vector (optimal valu
 
 oldQ = Q;
 countMeasurementsQ = zeros(S, A);
+
 
 nTotal = 0;
 while true
@@ -35,18 +36,23 @@ while true
         
         newQ(state, action) = actualReward;
     end
+    QperTrace(nTotal,:,:) = newQ;
     countMeasurementsQ = countMeasurementsQ + EpisodeStates;
     
     Q = Q + (1./max(countMeasurementsQ,1)).*(newQ - Q).*EpisodeStates;
     
     Qdif = abs(oldQ - Q);
     vectorQdif = Qdif(:);
-    if max(vectorQdif) < 0.0001
+    if max(vectorQdif) < 0.001
         break;
     end
     
     oldQ = Q;
 end
+
+
+varQTrace = var(QperTrace,0,1)
+maxVarQ = max(varQTrace(:))
 
 n = nTotal;
 end

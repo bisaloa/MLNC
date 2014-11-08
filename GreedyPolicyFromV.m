@@ -1,9 +1,9 @@
-function [GreedyPolicy] =  GreedyPolicyFromV(V, T, R, Absorbing, gamma)
+function [GreedyPolicy,Q] =  GreedyPolicyFromV(V, T, R, Absorbing, gamma)
 
 S = length(T);
 A = length(T(1,1,:));
 GreedyPolicy = zeros(S, A); % each row has A possible actions each has an assigned probability
-
+Q = zeros(S, A);
 for priorState = 1:S
     if Absorbing(priorState)
         continue
@@ -17,6 +17,8 @@ for priorState = 1:S
         tmpQs(action) = tmpQ;
     end
     [value, index] = max(tmpQs);
+    % state-action value 
+    Q(priorState, :) = tmpQs;
     GreedyPolicy(priorState, index) = 1;
 end
 
