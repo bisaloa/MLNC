@@ -39,16 +39,14 @@ for iGamma = 1: length(gamma)
             Absorbing,gamma(iGamma),epsilon,nMax,NMax);
         
         gamma(iGamma)
-        nMax
-        NMax
-        OptimalPolicy
-        table(iGamma).gamma = gamma(iGamma);
-        table(iGamma).nMax = nMax;
-        table(iGamma).NMax = NMax;
-        table(iGamma).nMean = nMean;
-        table(iGamma).NMean = NMean;
-        table(iGamma).Qvar = QVar;
-        table(iGamma).OptimalPolicy = OptimalPolicy;
+       
+        tableGamma(iGamma).gamma = gamma(iGamma);
+        tableGamma(iGamma).nMax = nMax;
+        tableGamma(iGamma).NMax = NMax;
+        tableGamma(iGamma).nMean = nMean;
+        tableGamma(iGamma).NMean = NMean;
+        tableGamma(iGamma).Qvar = QVar;
+        tableGamma(iGamma).OptimalPolicy = OptimalPolicy;
 end
 
 %DisplayFunctionalPolicy(OptimalPolicy, StateNames, ActionNames);

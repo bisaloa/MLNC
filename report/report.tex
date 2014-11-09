@@ -137,21 +137,39 @@ The function \texttt{MonteCarloBatchOptimasation} implements on-policy Monte-Car
 
 These functions are used to compute the $\epsilon$-greedy policy on \texttt{GridWorld1} based on Monte-Carlo Reinforcement Learning. In order to obtain the policy from the state-action value function, the estimation of Q must be accurate. As the number of traces tends to infinity, the estimate of Q converges to its real value. In practice, however, the number of traces must be a finite value and, ideally, should be a small one. It is important to notice that this value not only depends on the complexity of the networks and the traces themselves, but also other parameters of the method, such as the discount factor $\gamma$, influence it.
 
-The function \texttt{MonteCarloEstimationTestn} implements Monte-Carlo state-action value estimation (like \texttt{MonteCarloEstimation}) with on-line averaging. This function outputs the estimation of the state-action value function, the number of traces needed to converge with an accuracy level of 0.001 given a particular set of random traces, and the maximum value of the variance of the returns for each state and action. The number of traces needed to obtain an accurate estimation of Q and the maximum variance of the returns should be closely related: if the variance is high, the convergence is slow.
+The function \texttt{MonteCarloEstimationTestn} implements Monte-Carlo state-action value estimation (like \texttt{MonteCarloEstimation}) with on-line averaging.\footnote{ For each new sample: \begin{algorithmic}
+  \STATE Q(s,a) $\leftarrow$ Q(s,a) + (R - Q(s,a)) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
+\end{algorithmic}} This function outputs the estimation of the state-action value function, the number of traces needed to converge with an accuracy level of 0.001 given a particular set of random traces, and the maximum value of the variance of the returns for each state and action. The number of sample traces needed to obtain an accurate estimation of Q and the maximum variance of the returns should be closely related: if the variance is high, the convergence is slow.
 
 Figure~\ref{fig:maxvar} shows the mean of the maximum variance for 20 different state-action value function estimation (Q) and the corresponding mean of the number of sample traces needed to converge to an accurate estimation of Q for different values of the discount factor $\gamma$ (from 0.5 to 1). As stated before, when the variance is high, the number of traces needed to converge is also high; this is the case when $\gamma$=1, i.e. no \textit{discounting} is applied in the calculation of the return. The problem with this is that the sample traces can be arbitrarily long (they may include multiple loops). The return of traces with a high number of steps is prone to have a high absolute value, which may differ significantly from the returns of shorter traces; causing a high variance.\footnote{This values were computed assuming that S8 is the initial state.}
 
 \begin{figure}
 \centering
 \setlength\fboxsep{0pt}
-\setlength\fboxrule{0.5pt}
-\fbox{\includegraphics[scale=0.6]{./figures/fig_maximum_variance}}
+\setlength\fboxrule{0.6pt}
+\fbox{\includegraphics[scale=0.5]{./figures/fig_maximum_variance}}
 \caption{Mean of the maximum variance of 20 different Q estimations and corresponding mean of the number of sample traces needed to converge to an accurate Q estimation for different values of $\gamma$. \label{fig:maxvar}}
 \end{figure}
 
 When $\gamma$ is low, the return maximizes immediate rewards. The problem with this is that actions taken to maximize returns in states "far" from the goal, may decrease the chances to get to the final goal, where the reward is high. This leads to the inability of computing optimal policies from the state-action value function. Figure~\ref{fig:gamma comp} shows the action with the highest probability in each state as computed by the function \texttt{MonteCarloBatchOptimasation} when $\epsilon=0.5$. For $\gamma$=0.5, the preferred actions in S9, S10, and S11 do not lead to S4 (absorbing state with the highest reward); this also happens in S9 when $\gamma$=0.6. For higher values of $\gamma$ \texttt{MonteCarloBatchOptimasation} converges to an Optimal Policy when the number of batches N is sufficiently large, assuming that the state-action value function estimates are accurate.
 
-As the Figure~\ref{fig:maxvar} suggests, the mean number of sample traces needed to compute an estimation of Q with an accuracy level of 0.001 does not vary much for $\gamma$ between 0.5 and 0.9. Therefore, the value of the \textbf{discount factor $\gamma$} chosen is \textbf{0.9}, to ensure that the optimal actions have the highest probability in the $\epsilon$-greedy policy (obtained by calling the function \texttt{MonteCarloBatchOptimasation}).
+As the Figure~\ref{fig:maxvar} suggests, the mean number of sample traces needed to compute an estimation of Q with an accuracy level of 0.001 does not vary much for $\gamma$ between 0.5 and 0.9. Therefore, the value of the \textbf{discount factor $\gamma$} chosen is \textbf{0.9}, to ensure that the optimal actions have the highest probability in the $\epsilon$-greedy policy (obtained by calling the function \texttt{MonteCarloBatchOptimasation}). The \textbf{number of traces n}, in this case, is \textbf{2042}, which is an estimation of the maximum number of sample traces needed to compute an estimate of Q with an accuracy level of 0.001.
+
+\begin{figure}
+\centering
+\setlength\fboxsep{0pt}
+\setlength\fboxrule{0.5pt}
+\fbox{\includegraphics[scale=0.6]{./figures/epsilonfig}}
+\caption{Percentage of optimal actions in  $\epsilon$-greedy policies  and estimation of the maximum number of batches to converge to a good approximation of the optimal policy for different values of $\epsilon$. \label{fig:epsilon}}
+\end{figure}
+
+When searching for the optimal policy using Monte-Carlo methods, it is important to maintain the appropriate balance between exploration and exploitation. If what seems the best choice is always followed, then other possible better options are not explored, and the optimal policy is never found. If, on the contrary, other alternative actions are also tested, the algorithm is prone to discover better choices. However, a  fixed exploration factor makes impossible to achieve an optimal policy, since all the actions have a certain probability.
+
+Once the number of sample traces \texttt{n} and the discount factor $\gamma$ are settled, appropriate values for the number of batches \texttt{N} and the exploration-exploitation factor must be established. As stated before, these two parameters are crucial to converge to a good approximation of the optimal policy. In order to compute them, the function \texttt{MonteCarloBatchOptimasationTestN} is used. This function iterates until it converges to a final $\epsilon$-greedy policy. Figure~\ref{fig:epsilon} shows the maximum number of batches computed for different values of $\epsilon$ taken into account 20 trials. It also shows the percentage of optimal actions in the $\epsilon$-greedy policies computed by \texttt{MonteCarloBatchOptimasation} for the maximum number of batches obtained previously and the corresponding $\epsilon$.
+
+As Figure~\ref{fig:epsilon} suggests, for small values of $\epsilon$ the number of batches to converge to an $\epsilon$-greedy policy is quite high compared to bigger values of this parameter. This is because methods with high $\epsilon$ explore more and, therefore, find the optimal actions faster. However, they assign a high probability to non-optimal actions. Hence, in general the percentage of optimal actions for this methods is lower than for methods with a small $\epsilon$.
+
+It is important to notice that when the exploration is high, the optimal actions are detected. However, the probability of each action is assigned taken into account not only the state-action value function, but also the exploration-exploitation factor. As suggested by [Ref Reinforcement Learning Book], a good approach could be decrease the value $\epsilon$ over the time, so it could converge to the optimal policy. For the particular \texttt{GridWorld1}, the value of $\epsilon$ chosen is 0.3, since the method generates a policy with a high percentage of optimal values (88.75$\%$) for a fairly low maximum number of batches (12).
 
 \begin{figure}[ht!]
      \begin{center}
@@ -175,12 +193,5 @@ As the Figure~\ref{fig:maxvar} suggests, the mean number of sample traces needed
      }%
    \label{fig:gammacomp}
 \end{figure}
-
-
-\subsection*{Question 2}
-
-In the case of \texttt{GridWorld1}, the number of traces needed to get an accurate estimation of the state-value function is about 16250. With this number of traces, the maximum difference between the values of the state-value function between two consecutive iterations is less than 0.001, and therefore, convergence is assumed. The number of batches needed until converge to the optimal policy is 5.
-
-
 
 \end{document}  

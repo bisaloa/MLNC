@@ -14,7 +14,7 @@ while true
    
     nBatch = nBatch + 1;
    newQ = MonteCarloEstimation(T,R,Initial,Absorbing,eGreedyPolicy,gamma,n);
-   neweGreedyPolicy = eGreedyPolicyFromQ(newQ, Absorbing, epsilon);
+   neweGreedyPolicy = eGreedyPolicyFromQ(newQ, Absorbing, epsilon)
    
    %Qdif = newQ - Q;
     %vectorQdif = Qdif(:);
