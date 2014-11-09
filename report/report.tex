@@ -9,8 +9,15 @@
 \usepackage{tabularx}
 \usepackage{float}
 \usepackage{amsmath}
-%\usepackage[lined,boxed,figure]{algorithm2e}
-\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[hypcap]{caption}
+\usepackage{graphicx}
+\usepackage{framed}
+\usepackage{subfigure}
+
+
+%\floatstyle{boxed}
+\restylefloat{figure}
 
 
 %SetFonts
@@ -74,9 +81,9 @@ In the case of the first row, there is no transition to get to the current state
 
 In an absorbing state, the state where the trace ends, no further actions are taken. Therefore, the value for the last action is a dummy one.
 
-The function \texttt{MonteCarloEstimation} implements  \textbf{First-Visit Monte-Carlo} method. The signature of the function is the following:\\
+The function \texttt{MonteCarloEstimation} implements \textbf{First-Visit Monte-Carlo} state-action value estimation. The signature of the function is the following:\\
 
-\texttt{ [Q] = MonteCarloEstimation( T, R,  Initial, Absorbing, Policy, gamma, n)} \\
+\noindent\texttt{ [Q] = MonteCarloEstimation( T, R,  Initial, Absorbing, Policy, gamma, n)} \\
 \\
 \texttt{ T }$\equiv$ transition matrix,\\
 \texttt{ R }$\equiv$ reward matrix,\\
@@ -86,41 +93,88 @@ The function \texttt{MonteCarloEstimation} implements  \textbf{First-Visit Monte
 \texttt{ gamma} $\equiv$ discounted reward,\\
 \texttt{ n }$\equiv$ number of traces to sample.\\
 
-The implementation of First-Visit Monte-Carlo is shown in procedural form in figure ~\ref{fig:MC-FV}.
-begin{algorithmic}
+The implementation of First-Visit Monte-Carlo is shown in procedural form in Figure~\ref{fig:mcfv}. The matrix of Q-values is estimated as the average of the returns following the first visit to state-action for all the traces.
+\begin{figure}[!ht]
+\begin{framed}
+\begin{algorithmic}
  	\STATE SumReturns(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
  	\STATE N(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
-	 \FOR{$i=1$ \TO $n}
-  		generate a new trace\;
-  		\IF{first time $(s,a)$ appearing in the trace}
-   			R $\leftarrow$ return following the first occurrence of (s,a)\;
-   			SumReturns(s,a) $\leftarrow$ SumReturns(s,a) + R\;
-   			N(s,a) $\leftarrow$ N(s,a) + 1\;
+	 \FOR{$i=1$ \TO n}
+  		\STATE generate a new trace\;
+  		\IF{first time (s,a) appearing in the trace}
+   			\STATE R $\leftarrow$ return following the first occurrence of (s,a)\;
+   			\STATE SumReturns(s,a) $\leftarrow$ SumReturns(s,a) + R\;
+   			\STATE N(s,a) $\leftarrow$ N(s,a) + 1\;
   		\ENDIF
  	 \ENDFOR
- Q(s,a) \leftarrow SumReturns(s,a) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
- \caption{First-Visit Monte-Carlo implementation.}
+ \STATE Q(s,a) $\leftarrow$ SumReturns(s,a) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
 \end{algorithmic}
-
-
-
-%\begin{algorithm} [h!]
- %\KwResult{Q}
- %SumReturns(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
-% N(s,a) $\leftarrow$ 0, $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
-% \For{i $\leftarrow$ 1 $\KwTo$ n }{
-%  generate a new trace\;
-%  \If{first time $(s,a)$ appearing in the trace}{
-%   R $\leftarrow$ return following the first occurrence of (s,a)\;
- %  SumReturns(s,a) $\leftarrow$ SumReturns(s,a) + R\;
- %  N(s,a) $\leftarrow$ N(s,a) + 1\;
- % }
- %}
-% Q(s,a) $\leftarrow$ SumReturns(s,a) / N(s,a), $\forall$ s $\in$ States, $\forall$ a $\in$ Actions\;
- %\caption{First-Visit Monte-Carlo implementation.}
-%\end{algorithm}
+\end{framed}
+ \caption{First-Visit Monte-Carlo implementation.\label{fig:mcfv}}
+ \end{figure}
  
+The function \texttt{eGreedyPolicyFromQ} outputs an $\epsilon$-greedy policy based on the state-action value function. The signature of the function is the following:\\
 
+\noindent\texttt{ [eGreedyPolicy] = eGreedyPolicyFromQ( T, Absorbing, epsilon)} \\
+\\
+\texttt{ T }$\equiv$ transition matrix,\\
+\texttt{ Absorbing} $\equiv$ vector whose values are 0 for non-absorbing states and 1 for absorbing ones,\\
+\texttt{ epsilon} $\equiv$ exploration-exploitation factor\\
+ 
+The function \texttt{MonteCarloBatchOptimasation} implements on-policy Monte-Carlo Batch optimisation, where the Q and the $\epsilon$-greedy policy are updated in each batch, with the aim of converging to the optimal policy. The signature of the function is the following:\\
+
+\noindent\texttt{ [eGreedyPolicy] = eGreedyPolicyFromQ( T, R,  Initial, Absorbing, Policy, gamma, epsilon, n, N)} \\
+\\
+\texttt{ T }$\equiv$ transition matrix,\\
+\texttt{ R }$\equiv$ reward matrix,\\
+\texttt{ Initial} $\equiv$ vector with the probabilities of being the first state for each non-absorbing state,\\
+\texttt{ Absorbing} $\equiv$ vector whose values are 0 for non-absorbing states and 1 for absorbing ones,\\
+\texttt{ Policy} $\equiv$ matrix with the probabilities of each action in each of the states,\\
+\texttt{ gamma} $\equiv$ discounted reward,\\
+\texttt{ epsilon} $\equiv$ exploration-exploitation factor\\
+\texttt{ n }$\equiv$ number of traces per batch.\\
+\texttt{ N }$\equiv$ number of batches.\\ 
+
+These functions are used to compute the $\epsilon$-greedy policy on \texttt{GridWorld1} based on Monte-Carlo Reinforcement Learning. In order to obtain the policy from the state-action value function, the estimation of Q must be accurate. As the number of traces tends to infinity, the estimate of Q converges to its real value. In practice, however, the number of traces must be a finite value and, ideally, should be a small one. It is important to notice that this value not only depends on the complexity of the networks and the traces themselves, but also other parameters of the method, such as the discount factor $\gamma$, influence it.
+
+The function \texttt{MonteCarloEstimationTestn} implements Monte-Carlo state-action value estimation (like \texttt{MonteCarloEstimation}) with on-line averaging. This function outputs the estimation of the state-action value function, the number of traces needed to converge with an accuracy level of 0.001 given a particular set of random traces, and the maximum value of the variance of the returns for each state and action. The number of traces needed to obtain an accurate estimation of Q and the maximum variance of the returns should be closely related: if the variance is high, the convergence is slow.
+
+Figure~\ref{fig:maxvar} shows the mean of the maximum variance for 20 different state-action value function estimation (Q) and the corresponding mean of the number of sample traces needed to converge to an accurate estimation of Q for different values of the discount factor $\gamma$ (from 0.5 to 1). As stated before, when the variance is high, the number of traces needed to converge is also high; this is the case when $\gamma$=1, i.e. no \textit{discounting} is applied in the calculation of the return. The problem with this is that the sample traces can be arbitrarily long (they may include multiple loops). The return of traces with a high number of steps is prone to have a high absolute value, which may differ significantly from the returns of shorter traces; causing a high variance.\footnote{This values were computed assuming that S8 is the initial state.}
+
+\begin{figure}
+\centering
+\setlength\fboxsep{0pt}
+\setlength\fboxrule{0.5pt}
+\fbox{\includegraphics[scale=0.6]{./figures/fig_maximum_variance}}
+\caption{Mean of the maximum variance of 20 different Q estimations and corresponding mean of the number of sample traces needed to converge to an accurate Q estimation for different values of $\gamma$. \label{fig:maxvar}}
+\end{figure}
+
+When $\gamma$ is low, the return maximizes immediate rewards. The problem with this is that actions taken to maximize returns in states "far" from the goal, may decrease the chances to get to the final goal, where the reward is high. This leads to the inability of computing optimal policies from the state-action value function. Figure~\ref{fig:gamma comp} shows the action with the highest probability in each state as computed by the function \texttt{MonteCarloBatchOptimasation} when $\epsilon=0.5$. For $\gamma$=0.5, the preferred actions in S9, S10, and S11 do not lead to S4 (absorbing state with the highest reward); this also happens in S9 when $\gamma$=0.6. For higher values of $\gamma$ \texttt{MonteCarloBatchOptimasation} converges to an Optimal Policy when the number of batches N is sufficiently large, assuming that the state-action value function estimates are accurate.
+
+As the Figure~\ref{fig:maxvar} suggests, the mean number of sample traces needed to compute an estimation of Q with an accuracy level of 0.001 does not vary much for $\gamma$ between 0.5 and 0.9. Therefore, the value of the \textbf{discount factor $\gamma$} chosen is \textbf{0.9}, to ensure that the optimal actions have the highest probability in the $\epsilon$-greedy policy (obtained by calling the function \texttt{MonteCarloBatchOptimasation}).
+
+\begin{figure}[ht!]
+     \begin{center}
+%
+        \subfigure[Greedy Policy for $\gamma$=0.5]{%
+            \label{fig:first}
+            \includegraphics[scale=0.45]{./figures/gamma_05}
+        }%
+        \subfigure[Greedy Policy for $\gamma$=0.6]{%
+           \label{fig:second}
+           \includegraphics[scale=0.45]{./figures/gamma_06}
+        }\\ %  ------- End of the first row ----------------------%
+        \subfigure[Optimal Policy]{%
+            \label{fig:third}
+            \includegraphics[scale=0.45]{./figures/optimal_policy}
+        }%
+        %
+    \end{center}
+    \caption{%
+        Actions with the highest probabilities in the $\epsilon$-greedy policies computed using Monte-Carlo Batch optimization for $\gamma$ between 0.5 and 1, and $\epsilon=0.5$. 
+     }%
+   \label{fig:gammacomp}
+\end{figure}
 
 
 \subsection*{Question 2}
