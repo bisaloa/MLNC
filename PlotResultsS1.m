@@ -1,4 +1,9 @@
-results = load('table_var');
+%% Plots of the results obtained from the performance analysis in
+%% cwS1Q2a.m and cwS1Q2b.m
+
+
+%% MonteCarloEstimation performance plot
+results = load('gammaPerformanceTable');
 table = results.table;
 
 nGammas =  size(table,2);
@@ -26,7 +31,8 @@ xlabel('\gamma', 'FontSize', 14, 'FontWeight','bold')
 ylabel(ax(1),'Variance','FontSize', 14, 'Color',[0,0,1], 'FontWeight','bold')
 ylabel(ax(2),'Number of traces', 'FontSize', 14, 'Color',[0,0.7,0],'FontWeight','bold')
 
-results = load('tableEpsilon2');
+%% MonteCarloBatchOptimasation performance plot
+results = load('epsilonPerformanceTable.mat');
 tableEpsilon = results.tableEpsilon;
 nEpsilons =  size(tableEpsilon,2);
 epsilons = zeros(1,nEpsilons);
@@ -48,14 +54,13 @@ OptimalPolicy = [0 1 0 0; % s1  E
                  0 0 0 1;]% s11 W
 for i = 1:nEpsilons
     epsilons(i) = tableEpsilon(1,i).epsilon;
-    difPolicies = (1/4)*(OptimalPolicy - tableEpsilon(1,i).OptimalPolicy);
+    difPolicies = (1/A)*(OptimalPolicy - tableEpsilon(1,i).OptimalPolicy);
     optimalActionPerc(i) = 100 *( 1 - (1/S)*(sum(sum(abs(difPolicies)))));
     nBatches(i) = tableEpsilon(1,i).NMax;
 end
 
 figure(2)
 [ax,hBar,hStem] = plotyy(1:length(epsilons),optimalActionPerc,1:length(epsilons),nBatches,'bar','stem');
-%text((1:length(epsilons))', optimalActionPerc',num2str(optimalActionPerc'), 'HorizontalAlignment','center', 'Color',[0,1,1]);
 text((1:length(epsilons))', nBatches',num2str(nBatches'), 'HorizontalAlignment','center', 'VerticalAlignment','baseline','Color',[0,0,0],'FontSize', 12);
 set(hBar,'FaceColor', [0 0.5 1]);
 set(hStem,'LineWidth', 2);
